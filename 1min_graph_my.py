@@ -109,7 +109,7 @@ class MyWindow(QMainWindow):
         self.text = QPlainTextEdit(self)
         self.text.isReadOnly()
         self.text.move(10, 10)
-        self.text.resize(500, 100)
+        self.text.resize(450, 110)
         style_sheet = "QPlainTextEdit { font-size: 40px;}"
         self.text.setStyleSheet(style_sheet)
 
