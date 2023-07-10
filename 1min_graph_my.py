@@ -17,6 +17,7 @@ URL = 'https://api.binance.com/api/v3/klines'
 
 
 price = 0
+date = ""
 class Worker(QThread):
     timeout = pyqtSignal(pd.DataFrame)
 
@@ -24,6 +25,7 @@ class Worker(QThread):
         super().__init__()
 
     def get_ohlcv(self):
+
         binance = ccxt.binance()
         ending_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         starting_time = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
@@ -57,6 +59,8 @@ class Worker(QThread):
         self.get_ohlcv()
         while True:
             global price
+            global date
+            date = datetime.now().strftime("%H:%M:%S")
             price = ccxt.binance().fetch_last_prices(['BTC/USDT'])['BTC/USDT']['price']
             cur_min_dt = dt.datetime.fromtimestamp(int((datetime.now()+timedelta(hours=9)).timestamp()))
             # 여기서 왜 프린트하면 9시간 후의 지금이 나올까? 분명 외국시간기준으로 가져와서 거기에다가 9시간 더하지 않았나...
@@ -105,17 +109,21 @@ class MyWindow(QMainWindow):
         self.text = QPlainTextEdit(self)
         self.text.isReadOnly()
         self.text.move(10, 10)
-        self.text.resize(400, 100)
-        style_sheet = "QPlainTextEdit { font-size: 40px; }"
+        self.text.resize(500, 120)
+        style_sheet = "QPlainTextEdit { font-size: 40px;}"
         self.text.setStyleSheet(style_sheet)
+
+
+
+
         # 여기 쭉
-        # plot_candles.colors.update(dict(
-        #     bull_shadow='#388d53',
-        #     bull_frame='#205536',
-        #     bull_body='#089981',
-        #     bear_shadow='#d56161',
-        #     bear_frame='#5c1a10',
-        #     bear_body='#f23645'))
+        plot_candles.colors.update(dict(
+            bull_shadow='#388d53',
+            bull_frame='#205536',
+            bull_body='#089981',
+            bear_shadow='#d56161',
+            bear_frame='#5c1a10',
+            bear_body='#f23645'))
         self.axs = [self.ax]                                 # finplot requres this property
         grid_layout.addWidget(self.ax.vb.win, 0, 0)          # ax.vb     (finplot.FinViewBox)
 
@@ -126,13 +134,13 @@ class MyWindow(QMainWindow):
         if self.df is not None:
             if self.plot is None:
                 #여기 한 라인
-                # self.plot = plot_candles.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
-                self.plot = fplt.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
-                self.text.setPlainText("BTCUSDT: " + str(price))
+                self.plot = plot_candles.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
+                # self.plot = fplt.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
+                self.text.setPlainText("BTCUSDT: $" + str(price) + "\n(" + date + ")")
                 fplt.show(qt_exec=False)
             else:
                 self.plot.update_data(self.df[['Open', 'Close', 'High', 'Low']])
-                self.text.setPlainText("BTCUSDT: " + str(price))
+                self.text.setPlainText("BTCUSDT: $" + str(price) + "\n(" + date + ")")
 
     @pyqtSlot(pd.DataFrame)
     def update_data(self, df):
@@ -142,7 +150,7 @@ class MyWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     # 여기 한 라인
-    # plot_candles = fplt.live(1)
+    plot_candles = fplt.live(1)
     window = MyWindow()
     # print("Hi")
     window.show()
