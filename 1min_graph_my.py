@@ -120,6 +120,7 @@ class MyWindow(QMainWindow):
 
         if self.df is not None:
             if self.plot is None:
+                #여기 한 라인
                 # self.plot = plot_candles.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
                 self.plot = fplt.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
                 fplt.show(qt_exec=False)
