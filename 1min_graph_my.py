@@ -103,13 +103,14 @@ class MyWindow(QMainWindow):
 
         # fplt.add_text(pos = , s='Bitcoin price: '+str(price))
         self.setWindowTitle("BTCUSDT Price in Binance")
-        plot_candles.colors.update(dict(
-            bull_shadow='#388d53',
-            bull_frame='#205536',
-            bull_body='#089981',
-            bear_shadow='#d56161',
-            bear_frame='#5c1a10',
-            bear_body='#f23645'))
+        # 여기 쭉
+        # plot_candles.colors.update(dict(
+        #     bull_shadow='#388d53',
+        #     bull_frame='#205536',
+        #     bull_body='#089981',
+        #     bear_shadow='#d56161',
+        #     bear_frame='#5c1a10',
+        #     bear_body='#f23645'))
         self.axs = [self.ax]                                 # finplot requres this property
         grid_layout.addWidget(self.ax.vb.win, 0, 0)          # ax.vb     (finplot.FinViewBox)
 
@@ -119,7 +120,8 @@ class MyWindow(QMainWindow):
 
         if self.df is not None:
             if self.plot is None:
-                self.plot = plot_candles.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
+                # self.plot = plot_candles.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
+                self.plot = fplt.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
                 fplt.show(qt_exec=False)
             else:
                 self.plot.update_data(self.df[['Open', 'Close', 'High', 'Low']])
@@ -131,17 +133,9 @@ class MyWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    plot_candles = fplt.live(1)
+    # 여기 한 라인
+    # plot_candles = fplt.live(1)
     window = MyWindow()
     # print("Hi")
-    #
-    # plot_candles = fplt.live(1)
-    # plot_candles.colors.update(dict(
-    #     bull_shadow='#388d53',
-    #     bull_frame='#205536',
-    #     bull_body='#52b370',
-    #     bear_shadow='#d56161',
-    #     bear_frame='#5c1a10',
-    #     bear_body='#e8704f'))
     window.show()
     app.exec_()
