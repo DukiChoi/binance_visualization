@@ -150,7 +150,7 @@ class MyWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     # 여기 한 라인
-    plot_candles = fplt.live(1)
+    plot_candles = fplt.Live()
     window = MyWindow()
     # print("Hi")
     window.show()
