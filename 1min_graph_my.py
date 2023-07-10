@@ -18,7 +18,6 @@ URL = 'https://api.binance.com/api/v3/klines'
 
 price = 0
 class Worker(QThread):
-    global price
     timeout = pyqtSignal(pd.DataFrame)
 
     def __init__(self):
@@ -57,12 +56,13 @@ class Worker(QThread):
     def run(self):
         self.get_ohlcv()
         while True:
+            global price
             price = ccxt.binance().fetch_last_prices(['BTC/USDT'])['BTC/USDT']['price']
             cur_min_dt = dt.datetime.fromtimestamp(int((datetime.now()+timedelta(hours=9)).timestamp()))
             # 여기서 왜 프린트하면 9시간 후의 지금이 나올까? 분명 외국시간기준으로 가져와서 거기에다가 9시간 더하지 않았나...
             # print(cur_min_dt)
             # print(dt.datetime.fromtimestamp((self.df.index[-1])))
-            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - BTC Price: " + str(price))
             # fplt.add_text((self.df.index[-1], 30300), s='BTC:\n$' + str(price))
             if cur_min_dt > dt.datetime.fromtimestamp(self.df.index[-1]):
                 self.get_ohlcv()
@@ -81,7 +81,6 @@ class Worker(QThread):
 class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
         self.df = None
         self.plot = None
 
@@ -100,9 +99,15 @@ class MyWindow(QMainWindow):
         self.setCentralWidget(view)
         self.resize(1200, 600)
         self.ax = fplt.create_plot('Bitcoin price: ' + str(price), init_zoom_periods=100)
-
         # fplt.add_text(pos = , s='Bitcoin price: '+str(price))
         self.setWindowTitle("BTCUSDT Price in Binance")
+
+        self.text = QPlainTextEdit(self)
+        self.text.isReadOnly()
+        self.text.move(10, 10)
+        self.text.resize(400, 100)
+        style_sheet = "QPlainTextEdit { font-size: 40px; }"
+        self.text.setStyleSheet(style_sheet)
         # 여기 쭉
         # plot_candles.colors.update(dict(
         #     bull_shadow='#388d53',
@@ -123,9 +128,11 @@ class MyWindow(QMainWindow):
                 #여기 한 라인
                 # self.plot = plot_candles.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
                 self.plot = fplt.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
+                self.text.setPlainText("BTCUSDT: " + str(price))
                 fplt.show(qt_exec=False)
             else:
                 self.plot.update_data(self.df[['Open', 'Close', 'High', 'Low']])
+                self.text.setPlainText("BTCUSDT: " + str(price))
 
     @pyqtSlot(pd.DataFrame)
     def update_data(self, df):
