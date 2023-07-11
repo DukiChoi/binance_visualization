@@ -30,7 +30,7 @@ class Worker(QThread):
         ending_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         starting_time = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
         start = int(time.mktime(datetime.strptime(starting_time, '%Y-%m-%d %H:%M:%S').timetuple())) * 1000
-        ohlcvs = binance.fetch_ohlcv('BTC/USDT', '15m', start, 1500)
+        ohlcvs = binance.fetch_ohlcv('BTC/USD', '15m', start, 1500)
         chart = []
         index_list = []
         for ohlcv in ohlcvs:
@@ -61,7 +61,7 @@ class Worker(QThread):
             global price
             global date
             date = datetime.now().strftime("%H:%M:%S")
-            price = ccxt.binance().fetch_last_prices(['BTC/USDT'])['BTC/USDT']['price']
+            price = ccxt.binance().fetch_last_prices(['BTC/USD'])['BTC/USD']['price']
             cur_min_dt = dt.datetime.fromtimestamp(int((datetime.now()+timedelta(hours=9)).timestamp()))
             # 여기서 왜 프린트하면 9시간 후의 지금이 나올까? 분명 외국시간기준으로 가져와서 거기에다가 9시간 더하지 않았나...
             # print(cur_min_dt)
@@ -104,7 +104,7 @@ class MyWindow(QMainWindow):
         self.resize(1200, 600)
         self.ax = fplt.create_plot('Bitcoin price: ' + str(price), init_zoom_periods=100)
         # fplt.add_text(pos = , s='Bitcoin price: '+str(price))
-        self.setWindowTitle("BTCUSDT Price in Binance")
+        self.setWindowTitle("BTCUSD Price in Binance")
 
         self.text = QPlainTextEdit(self)
         self.text.isReadOnly()
@@ -136,11 +136,11 @@ class MyWindow(QMainWindow):
                 #여기 한 라인
                 # self.plot = plot_candles.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
                 self.plot = fplt.candlestick_ochl(self.df[['Open', 'Close', 'High', 'Low']])
-                self.text.setPlainText("BTCUSDT: $" + str(price) + "\n(" + date + ")")
+                self.text.setPlainText("BTCUSD: $" + str(price) + "\n(" + date + ")")
                 fplt.show(qt_exec=False)
             else:
                 self.plot.update_data(self.df[['Open', 'Close', 'High', 'Low']])
-                self.text.setPlainText("BTCUSDT: $" + str(price) + "\n(" + date + ")")
+                self.text.setPlainText("BTCUSD: $" + str(price) + "\n(" + date + ")")
 
     @pyqtSlot(pd.DataFrame)
     def update_data(self, df):
