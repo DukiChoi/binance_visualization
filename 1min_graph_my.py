@@ -1,6 +1,6 @@
 import sys
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 import finplot as fplt
 from matplotlib.axis import YAxis
 import datetime as dt
@@ -153,4 +153,4 @@ if __name__ == "__main__":
     window = MyWindow()
     # print("Hi")
     window.show()
-    app.exec()
+    app.exec_()
