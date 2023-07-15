@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 import finplot as fplt
 from matplotlib.axis import YAxis
 import datetime as dt
@@ -79,7 +79,6 @@ class Worker(QThread):
                     self.df.iloc[-1]['Low'] = price
 
             self.timeout.emit(self.df)
-            time.sleep(1)
 
 
 class MyWindow(QMainWindow):
@@ -154,4 +153,4 @@ if __name__ == "__main__":
     window = MyWindow()
     # print("Hi")
     window.show()
-    app.exec_()
+    app.exec()
