@@ -5,7 +5,8 @@ Visualizing binance price data. (making a real-time chart)
 ![라즈베리파이](rasp.png)
 
 To use PyQt5 in Raspberry Pi, you need to use the command, "sudo apt install python3-pyqt5", rather than using "pip install pyqt5".
+Also for matplotlib, "sudo apt install python3-matplotlib".
+And if there is any errors about importing "Numpy" Library, try "sudo apt-get install python-dev libatlas-base-dev".
 
-
-Reference: [wikidocs.net- PyQt를 이용한 파이썬 GUI 프로그래밍](https://wikidocs.net/160261), [github.com/highfestiva](https://github.com/highfestiva/finplot/blob/master/finplot/examples/bitmex-ws.py)
+Reference: [wikidocs.net- PyQt를 이용한 파이썬 GUI 프로그래밍](https://wikidocs.net/160261), [github.com/highfestiva](https://github.com/highfestiva/finplot/blob/master/finplot/examples/bitmex-ws.py), [stackoverflow](https://stackoverflow.com/)
 
