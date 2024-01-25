@@ -30,7 +30,7 @@ class Worker(QThread):
         ending_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         starting_time = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
         start = int(time.mktime(datetime.strptime(starting_time, '%Y-%m-%d %H:%M:%S').timetuple())) * 1000
-        ohlcvs = binance.fetch_ohlcv('BTC/USDT', '15m', start, 1500)
+        ohlcvs = binance.fetch_ohlcv('BTC/USDT', '1h', start, 1500)
         chart = []
         index_list = []
         for ohlcv in ohlcvs:
