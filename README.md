@@ -13,5 +13,6 @@ Visualizing binance price data. (making a real-time chart)
 - "sudo nano /home/pi/.bashrc"  And add commands
   - echo Running at boot
   - sudo python3 file_to_run.py" (The actual code you want to run when booting)
-Reference: [wikidocs.net- PyQt를 이용한 파이썬 GUI 프로그래밍](https://wikidocs.net/160261), [github.com/highfestiva](https://github.com/highfestiva/finplot/blob/master/finplot/examples/bitmex-ws.py), [stackoverflow](https://stackoverflow.com/)
+
+Reference: [wikidocs.net- PyQt를 이용한 파이썬 GUI 프로그래밍](https://wikidocs.net/160261), [github.com/highfestiva](https://github.com/highfestiva/finplot/blob/master/finplot/examples/bitmex-ws.py), [stackoverflow](https://stackoverflow.com/), [화면보호기 비활성화](https://dalgong2.tistory.com/10)
 
