@@ -10,12 +10,11 @@ Visualizing binance price data. (making a real-time chart)
 - For qtwidgets, "pip3 install qtwidgets"
 - Use pip3 and python3 to run it.
 - Erase all the Korean comments
-- "sudo nano /home/pi/.bashrc"  And add commands
-  - echo Running at boot
-  - sudo python3 file_to_run.py" (The actual code you want to run when booting)
-- To autostart the terminal
-  - sudo vim /etc/xdg/lxsession/LXDE-pi/autostart
-  - @lxterminal
+- "sudo nano /home/pi/.bashrc"  and add commands
+  - "echo Running at boot"
+  - "sudo python3 file_to_run.py" (The actual code you want to run when booting)
+- To autostart the terminal "sudo nano /etc/xdg/lxsession/LXDE-pi/autostart" and add a command
+  - "@lxterminal"
 
 Reference: [wikidocs.net- PyQt를 이용한 파이썬 GUI 프로그래밍](https://wikidocs.net/160261), [github.com/highfestiva](https://github.com/highfestiva/finplot/blob/master/finplot/examples/bitmex-ws.py), [stackoverflow](https://stackoverflow.com/), [화면보호기 비활성화](https://dalgong2.tistory.com/10) , [라즈베리 부팅 후 터미널 자동실행](https://diggingfun.tistory.com/233)
 
