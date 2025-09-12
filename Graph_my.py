@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import time
 import pandas as pd
 import ccxt
+import traceback
+import random
 fplt.display_timezone = dt.timezone.utc
 fplt.candle_bull_color = "#FF0000"
 fplt.candle_bull_body_color = "#FF0000"
@@ -23,62 +25,70 @@ class Worker(QThread):
 
     def __init__(self):
         super().__init__()
-
+    def safe_fetch(self, func, *args, retries=3, **kwargs):
+        """네트워크 요청 안전하게 재시도"""
+        for i in range(retries):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                print(f"[Error] {e} (retry {i+1}/{retries})")
+                traceback.print_exc()
+                time.sleep(random.uniform(1, 3))  # 1~3초 랜덤 대기
+        return None
+    
     def get_ohlcv(self):
-
         binance = ccxt.binance()
-        ending_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         starting_time = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
         start = int(time.mktime(datetime.strptime(starting_time, '%Y-%m-%d %H:%M:%S').timetuple())) * 1000
-        ohlcvs = binance.fetch_ohlcv('BTC/USDT', '1h', start, 1500)
-        chart = []
-        index_list = []
+
+        ohlcvs = self.safe_fetch(binance.fetch_ohlcv, 'BTC/USDT', '1h', start, 1500)
+        if not ohlcvs:
+            print("[Error] Failed to fetch OHLCV data")
+            return
+
+        chart, index_list = [], []
         for ohlcv in ohlcvs:
             index_list.append(datetime.timestamp(datetime.fromtimestamp(ohlcv[0] / 1000) + timedelta(hours=9)))
-        # 원래 이 index_list는 index를 타임형태로 나타내주기 위해 작성했으나 사실상 필요없어졌다가 다시 부활시킴.
-        for ohlcv in ohlcvs:
-            chart.append(
-                [(datetime.fromtimestamp(ohlcv[0] / 1000)+timedelta(hours=9)).strftime('%m-%d'), ohlcv[1], ohlcv[4], ohlcv[3], ohlcv[2],
-                 ohlcv[5]])
-        '''여기서 크롤링한 리스트들을 활용하여 pandas 표를 만들기 위한 리스트를 새로 만든다.
-        첫번째 for문은 index 만들어주는거고 두번째 for문은 나머지 값들 리스트다.'''
+            chart.append([
+                (datetime.fromtimestamp(ohlcv[0] / 1000)+timedelta(hours=9)).strftime('%m-%d'),
+                ohlcv[1], ohlcv[4], ohlcv[3], ohlcv[2], ohlcv[5]
+            ])
         columns = ['time', 'open', 'close', 'low', 'high', 'volume']
         stock_ds = pd.DataFrame.from_records(chart, index=index_list, columns=columns)
-        # 여기서 index=index_list로 넣어주면 인덱스가 타임형태.
-        # print(stock_ds)
-        stock_ds[['open', 'close', 'low', 'high', 'volume']] = stock_ds[
-            ['open', 'close', 'low', 'high', 'volume']].astype(float)
-        # stock_ds.index=stock_ds.index.astype(str)
+        stock_ds[['open', 'close', 'low', 'high', 'volume']] = stock_ds[['open', 'close', 'low', 'high', 'volume']].astype(float)
         stock_ds['time'] = stock_ds['time'].astype(str)
-        # time열을 string으로 나머지 값들은 int로 바꿔주는 절차.
-        self.df = stock_ds
-        self.df = self.df[['open', 'high', 'low', 'close']]
+        self.df = stock_ds[['open', 'high', 'low', 'close']]
         self.df.columns = ['Open', 'High', 'Low', 'Close']
-        # print(self.df)
+
     def run(self):
         self.get_ohlcv()
         while True:
-            global price
-            global date
-            date = datetime.now().strftime("%H:%M:%S")
-            price = ccxt.binance().fetch_last_prices(['BTC/USDT'])['BTC/USDT']['price']
-            cur_min_dt = dt.datetime.fromtimestamp(int((datetime.now()+timedelta(hours=9)).timestamp()))
-            # 여기서 왜 프린트하면 9시간 후의 지금이 나올까? 분명 외국시간기준으로 가져와서 거기에다가 9시간 더하지 않았나...
-            # print(cur_min_dt)
-            # print(dt.datetime.fromtimestamp((self.df.index[-1])))
-            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - BTC Price: " + str(price))
-            # fplt.add_text((self.df.index[-1], 30300), s='BTC:\n$' + str(price))
-            if cur_min_dt > dt.datetime.fromtimestamp(self.df.index[-1]):
-                self.get_ohlcv()
-            else:
-                # update last candle
-                self.df.iloc[-1]['Close'] = price
-                if price > self.df.iloc[-1]['High']:
-                    self.df.iloc[-1]['High'] = price
-                if price < self.df.iloc[-1]['Low']:
-                    self.df.iloc[-1]['Low'] = price
+            try:
+                global price, date
+                date = datetime.now().strftime("%H:%M:%S")
+                last_price_data = self.safe_fetch(ccxt.binance().fetch_last_prices, ['BTC/USDT'])
+                if not last_price_data:
+                    continue
+                price = last_price_data['BTC/USDT']['price']
 
-            self.timeout.emit(self.df)
+                cur_min_dt = dt.datetime.fromtimestamp(int((datetime.now()+timedelta(hours=9)).timestamp()))
+
+                if self.df is not None and cur_min_dt > dt.datetime.fromtimestamp(self.df.index[-1]):
+                    self.get_ohlcv()
+                elif self.df is not None:
+                    self.df.at[self.df.index[-1], 'Close'] = price
+                    self.df.at[self.df.index[-1], 'High'] = max(self.df.iloc[-1]['High'], price)
+                    self.df.at[self.df.index[-1], 'Low'] = min(self.df.iloc[-1]['Low'], price)
+
+                if self.df is not None:
+                    self.timeout.emit(self.df)
+
+                print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - BTC Price: " + str(price))
+
+            except Exception as e:
+                print(f"[Worker Error] {e}")
+                traceback.print_exc()
+                time.sleep(2)
 
 
 class MyWindow(QMainWindow):
