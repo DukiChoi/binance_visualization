@@ -1,4 +1,5 @@
 import sys
+import warnings
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import finplot as fplt
@@ -18,6 +19,7 @@ fplt.candle_bear_color = "#0000FF"
 URL = 'https://api.binance.com/api/v3/klines'
 
 
+warnings.filterwarnings("ignore", category=FutureWarning)
 price = 0
 date = ""
 class Worker(QThread):
@@ -164,3 +166,4 @@ if __name__ == "__main__":
     # print("Hi")
     window.show()
     app.exec_()
+
